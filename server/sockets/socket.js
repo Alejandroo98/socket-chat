@@ -25,21 +25,22 @@ io.on('connection', ( client ) => {
 
         // client.broadcast.emit('listaPersonas' , usuarios.getPersonas()) //ESTO ES PARA PODER AMIIR UN MENSAJE A TODOS LOS DEL CHAT LA LINEA DE ABAJO SIRVE PARA LOS CHAT EN GRUPOS
         io.sockets.to( data.sala ).emit('listaPersonas' , usuarios.getPersonasPorSala( data.sala ))
-        // client.broadcast.to(data.sala).emit('crearMensaje', crearMensaje('Administrador', `${ data.nombre } se unió`));
+        client.broadcast.to(data.sala).emit('crearMensaje', crearMensjae('administrador', `${ data.nombre } se unio`));
         //  console.log(usuarios.getPersonasPorSala( data.sala )); 
 
         callback( usuarios )
         
     })
 
-    client.on('crearMensaje' , data => {
+    client.on('crearMensaje' , (data , callback ) => {
 
         let persona = usuarios.getPersona( client.id )
         
         let mensaje = crearMensjae( persona.nombre , data.mensaje );
 
-        io.sockets.to(persona.sala).emit( 'crearMensaje' , mensaje )
+        client.broadcast.to(persona.sala).emit( 'crearMensaje' , mensaje )
 
+        callback( mensaje )
         
     } )
     
@@ -48,8 +49,8 @@ io.on('connection', ( client ) => {
 
         let personaBorrada = usuarios.borrarPersona(client.id);
 
-        io.sockets.to( personaBorrada.sala ).emit('crearMensaje' ,  crearMensjae('administrador' , `${ personaBorrada.nombre } abandono el chat `))
-        io.sockets.to( personaBorrada.sala ).emit('listaPersonas' ,  usuarios.getPersonasPorSala( personaBorrada.sala ))
+        client.broadcast.to( personaBorrada.sala ).emit('crearMensaje' ,  crearMensjae('administrador' , `${ personaBorrada.nombre } abandono el chat `))
+        client.broadcast.to( personaBorrada.sala ).emit('listaPersonas' ,  usuarios.getPersonasPorSala( personaBorrada.sala ))
         
     })
 
@@ -57,7 +58,7 @@ io.on('connection', ( client ) => {
     client.on('mensajePrivado' , data => {
 
         let persona = usuarios.getPersona( client.id );
-        io.sockets.to(data.para).emit('mensajePrivado' , crearMensjae( persona.nombre , data.mensaje ) ); //el to() sive par enviar un mensaje privado y entre paraentesis esta el id
+        client.broadcast.to(data.para).emit('mensajePrivado' , crearMensjae( persona.nombre , data.mensaje ) ); //el to() sive par enviar un mensaje privado y entre paraentesis esta el id
         
     } )
 

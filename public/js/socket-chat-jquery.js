@@ -1,7 +1,17 @@
+
 var params = new URLSearchParams(window.location.search);
+var nombre = params.get('nombre')
+var sala = params.get('sala')
 
 //Referencias de jquery
 var divUsuarios = $('#divUsuarios');
+var formEnviar = $('#formEnviar');
+var txtMensaje = $('#txtMensaje');
+var divChatbox = $('#divChatbox');
+
+
+
+
 
 // Funciones par renderizar usuarioas
 
@@ -25,3 +35,104 @@ function renderizarUsuarios(  personas  ){
     divUsuarios.html( html )
     
 }
+
+
+
+    function renderizarMensajes( mensaje , yo ){
+
+        var html = '';
+        var fecha = new Date( mensaje.fecha );
+        var hora = fecha.getHours() + ':' + fecha.getMinutes();
+
+        var adminClass = 'info'
+
+        if( mensaje.nombre === 'administrador' ){
+            adminClass = 'danger'
+        }
+
+
+        if( yo ){
+
+            html += '<li class="reverse">';
+            html += '    <div class="chat-content">';
+            html += '        <h5>'+ mensaje.nombre +'</h5>';
+            html += '        <div class="box bg-light-inverse">'+ mensaje.mensaje +'</div>';
+            html += '    </div>';
+            html += '    <div class="chat-img"><img src="assets/images/users/5.jpg" alt="user" /></div>';
+            html += '    <div class="chat-time">'+ hora +'</div>';
+            html += '</li>';
+            
+        } else{
+
+            html += '<li class="animated fadeIn"  >'
+
+            if( mensaje.nombre !== 'administrador' ){
+                html += '    <div class="chat-img"><img src="assets/images/users/1.jpg" alt="user" /></div>'
+            }
+            
+            html += '    <div class="chat-content">'
+            html += '        <h5>' + mensaje.nombre + '</h5>'
+            html += '        <div class="box bg-light-'+ adminClass +'">'+ mensaje.mensaje +'</div>'
+            html += '    </div>'
+            html += '    <div class="chat-time">'+ hora +'</div>'
+            html += '</li>'
+
+        }
+      
+    divChatbox.append(html)
+        
+    }
+
+
+
+    //ESTO SIRVE PARA PARA QUE LA PANTALLA SIEMPRE BAJE A MEDIDA QUE NOS ENVIAM MENSAJES
+    function scrollBottom() {
+
+        // selectors
+        var newMessage = divChatbox.children('li:last-child');
+    
+        // heights
+        var clientHeight = divChatbox.prop('clientHeight');
+        var scrollTop = divChatbox.prop('scrollTop');
+        var scrollHeight = divChatbox.prop('scrollHeight');
+        var newMessageHeight = newMessage.innerHeight();
+        var lastMessageHeight = newMessage.prev().innerHeight() || 0;
+    
+        if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+            divChatbox.scrollTop(scrollHeight);
+        }
+    }
+    
+    
+    
+
+
+//Listeners
+divUsuarios.on('click' , 'a' , function(){  //El significa que cuando le de click en cualquier ancortac que se encuentre dentro del divUsuarios
+
+    var id = $(this).data('id');  //(Ademas el id que esta entre parentecis hace referencia al data-id=""  que esta en la linea de arriba, es un id personalizado que en este casos se llama id pero podria llamarse como sea despuesd de la palabra data- )      //El this hace referencia al ancortac que hicimos referencia gracias al --> 'a'
+    
+    if( id ){
+    console.log(id);
+    }
+    
+}) 
+
+formEnviar.on('submit' , function(e){
+
+    e.preventDefault();
+    if( txtMensaje.val().trim().length === 0 ){  //Esto sirve para que no se peudan enviar mensajes vacios. El trim siver para eliminar espacios en blanco al inicio y al final
+        return;
+    }
+
+        socket.emit('crearMensaje', {
+        nombre: nombre,
+        mensaje: txtMensaje.val()
+        }, function( mensaje ) {
+            txtMensaje.val('').focus()
+            renderizarMensajes( mensaje , true )
+            scrollBottom();
+        });
+    
+
+})
