@@ -7,9 +7,10 @@ const usuarios = new Usuarios();
 
 io.on('connection', ( client ) => {
 
-
+    
     client.on('entrarChat' , ( data , callback ) => {
-
+        
+        console.log('Bien server');
         
         if( !data.nombre ||  !data.sala ){
             return callback({
@@ -23,7 +24,9 @@ io.on('connection', ( client ) => {
         usuarios.agregarPersona( client.id , data.nombre , data.sala )
 
         // client.broadcast.emit('listaPersonas' , usuarios.getPersonas()) //ESTO ES PARA PODER AMIIR UN MENSAJE A TODOS LOS DEL CHAT LA LINEA DE ABAJO SIRVE PARA LOS CHAT EN GRUPOS
-        client.broadcast.to( data.sala ).emit('listaPersonas' , usuarios.getPersonasPorSala( data.sala ) )
+        io.sockets.to( data.sala ).emit('listaPersonas' , usuarios.getPersonasPorSala( data.sala ))
+        // client.broadcast.to(data.sala).emit('crearMensaje', crearMensaje('Administrador', `${ data.nombre } se unió`));
+        //  console.log(usuarios.getPersonasPorSala( data.sala )); 
 
         callback( usuarios )
         
@@ -35,7 +38,7 @@ io.on('connection', ( client ) => {
         
         let mensaje = crearMensjae( persona.nombre , data.mensaje );
 
-        client.broadcast.to( persona.sala ).emit( 'crearMensaje' , mensaje )
+        io.sockets.to(persona.sala).emit( 'crearMensaje' , mensaje )
 
         
     } )
@@ -43,10 +46,10 @@ io.on('connection', ( client ) => {
     
     client.on('disconnect' , () => {
 
-        let personaBorrada = usuarios.borrarPersona( client.id );
+        let personaBorrada = usuarios.borrarPersona(client.id);
 
-        client.broadcast.to( personaBorrada.sala ).emit('crearMensaje' ,  crearMensjae('Administrador' , `${ personaBorrada.nombre } abandono el chat ` ))
-        client.broadcast.to( personaBorrada.sala ).emit('listaPersonas' , usuarios.getPersonasPorSala( personaBorrada.sala ) )
+        io.sockets.to( personaBorrada.sala ).emit('crearMensaje' ,  crearMensjae('administrador' , `${ personaBorrada.nombre } abandono el chat `))
+        io.sockets.to( personaBorrada.sala ).emit('listaPersonas' ,  usuarios.getPersonasPorSala( personaBorrada.sala ))
         
     })
 
@@ -54,7 +57,7 @@ io.on('connection', ( client ) => {
     client.on('mensajePrivado' , data => {
 
         let persona = usuarios.getPersona( client.id );
-        client.broadcast.to( data.para ).emit('mensajePrivado' , crearMensjae( persona.nombre , data.mensaje ) ); //el to() sive par enviar un mensaje privado y entre paraentesis esta el id
+        io.sockets.to(data.para).emit('mensajePrivado' , crearMensjae( persona.nombre , data.mensaje ) ); //el to() sive par enviar un mensaje privado y entre paraentesis esta el id
         
     } )
 
