@@ -1,0 +1,23 @@
+Aquí cubriremos varios temas como: 
+
+
+
+Comunicación entre usuarios
+
+Comunicación entre 1 a muchos
+
+Comunicación 1 a 1
+
+Comunicación entre salas de chat
+
+Diseño del chat
+
+Diseño del login
+
+Notificaciones de entrada de usuarios y salida de usuarios
+
+El objetivo es crear una aplicación de chat completa
+
+
+LINK DEL REPO DEL PROFE DE ESTE PROYECTO
+https://github.com/Klerith/socket-chat/releases/tag/v1.0.0
